@@ -9,6 +9,7 @@
 namespace WPGraphQL\Extensions\Meta;
 
 use Exception;
+use GraphQL\Type\Definition\AbstractType;
 use WPGraphQL\Types;
 
 /**
@@ -88,6 +89,10 @@ function add_meta_fields( $fields, $object_type ) {
  * @return mixed
  */
 function resolve_meta_type( $type, $single = true ) {
+	if ( $type instanceof AbstractType ) {
+		return $type;
+	}
+
 	switch ( $type ) {
 		case 'integer':
 			$type = Types::int();
