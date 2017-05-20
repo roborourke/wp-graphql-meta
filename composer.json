@@ -1,0 +1,13 @@
+{
+    "name": "rob/wp-graphql-meta",
+    "description": "Meta data helper for wp-graphql",
+    "type": "library",
+    "license": "GPLv3",
+    "authors": [
+        {
+            "name": "Robert O'Rourke",
+            "email": "robert@o-rourke.org"
+        }
+    ],
+    "require": {}
+}
