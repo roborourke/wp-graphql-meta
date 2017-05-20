@@ -1,5 +1,5 @@
 {
-    "name": "rob/wp-graphql-meta",
+    "name": "roborourke/wp-graphql-meta",
     "description": "Meta data helper for wp-graphql",
     "type": "library",
     "license": "GPLv3",
