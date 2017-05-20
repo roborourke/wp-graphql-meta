@@ -8,15 +8,11 @@
 
 namespace WPGraphQL\Extensions\Meta;
 
-use Exception;
-use GraphQL\Type\Definition\AbstractType;
-use WPGraphQL\Types;
-
 /**
  * Get a collection of registered post types and taxonomies
  * then run them through the GraphQL fields filter.
  */
-add_action( 'after_setup_theme', function() {
+add_action( 'graphql_init', function() {
 
 	$post_types = get_post_types();
 	$taxonomies = get_taxonomies();
@@ -52,7 +48,7 @@ function add_meta_fields( $fields, $object_type ) {
 		foreach ( $meta_keys as $key => $field_args ) {
 
 			if ( isset( $fields[ $key ] ) ) {
-				throw new Exception( sprintf( 'Post meta key "%s" is a reserved word.', $key ) );
+				throw new \Exception( sprintf( 'Post meta key "%s" is a reserved word.', $key ) );
 			}
 
 			if ( ! $field_args['show_in_rest'] ) {
@@ -89,23 +85,23 @@ function add_meta_fields( $fields, $object_type ) {
  * @return mixed
  */
 function resolve_meta_type( $type, $single = true ) {
-	if ( $type instanceof AbstractType ) {
+	if ( $type instanceof \GraphQL\Type\Definition\AbstractType ) {
 		return $type;
 	}
 
 	switch ( $type ) {
 		case 'integer':
-			$type = Types::int();
+			$type = \WPGraphQL\Types::int();
 			break;
 		case 'number':
-			$type = Types::float();
+			$type = \WPGraphQL\Types::float();
 			break;
 		case 'boolean':
-			$type = Types::boolean();
+			$type = \WPGraphQL\Types::boolean();
 			break;
 		default:
-			$type = apply_filters( "graphql_{$type}_type", Types::string(), $type );
+			$type = apply_filters( "graphql_{$type}_type", \WPGraphQL\Types::string(), $type );
 	}
 
-	return $single ? $type : Types::list_of( $type );
+	return $single ? $type : \WPGraphQL\Types::list_of( $type );
 }
