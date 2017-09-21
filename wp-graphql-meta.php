@@ -22,8 +22,15 @@ add_action( 'graphql_init', function() {
 		array( 'user' )
 	);
 
+	// Some WPGraphQL type names differ from their post types.
+	$mapping = array(
+		'attachment' => 'mediaItem',
+	);
+
 	foreach ( $all_types as $type ) {
-		add_filter( "graphql_{$type}_fields", function ( $fields ) use ( $type ) {
+		$graphql_type = isset( $mapping[ $type ] ) ? $mapping[ $type ] : $type;
+
+		add_filter( "graphql_{$graphql_type}_fields", function ( $fields ) use ( $type ) {
 			return add_meta_fields( $fields, $type );
 		} );
 	}
