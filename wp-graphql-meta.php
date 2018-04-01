@@ -13,17 +13,27 @@ namespace WPGraphQL\Extensions\Meta;
  * then run them through the GraphQL fields filter.
  */
 add_action( 'graphql_init', function() {
-
-	$post_types = get_post_types();
-	$taxonomies = get_taxonomies();
-	$all_types  = array_merge(
-		$post_types,
-		$taxonomies,
-		array( 'user' )
+	/**
+	 * Gather a summary of post types and taxonomies with their registration
+	 * details. This allows us to inspect for graphql_single_name. The user model
+	 * is fixed so we just use null.
+	 */
+	$all_types = array_merge(
+		array_map( 'get_post_type_object', get_post_types() ),
+		array_map( 'get_taxonomy', get_taxonomies() ),
+		array( 'user' => null )
 	);
 
-	foreach ( $all_types as $type ) {
-		add_filter( "graphql_{$type}_fields", function ( $fields ) use ( $type ) {
+	foreach ( $all_types as $type => $object ) {
+		$graphql_type = $type;
+
+		// Use the graphql_single_name if it has been registered. Otherwise the
+		// filter will not work.
+		if ( isset( $object->graphql_single_name ) ) {
+			$graphql_type = $object->graphql_single_name;
+		}
+
+		add_filter( "graphql_{$graphql_type}_fields", function ( $fields ) use ( $type ) {
 			return add_meta_fields( $fields, $type );
 		} );
 	}
