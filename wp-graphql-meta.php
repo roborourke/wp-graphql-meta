@@ -12,7 +12,7 @@ namespace WPGraphQL\Extensions\Meta;
  * Get a collection of registered post types and taxonomies
  * then run them through the GraphQL fields filter.
  */
-add_action( 'graphql_init', function() {
+add_action( 'do_graphql_request', function() {
 
 	$post_types = get_post_types();
 	$taxonomies = get_taxonomies();
