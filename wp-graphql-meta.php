@@ -46,8 +46,9 @@ function add_meta_fields( $fields, $object_type ) {
 
 	if ( ! empty( $meta_keys ) ) {
 		foreach ( $meta_keys as $key => $field_args ) {
+			$field_name = apply_filters( 'graphql_meta_field_name', $key, $object_type );
 
-			if ( isset( $fields[ $key ] ) ) {
+			if ( isset( $fields[ $field_name ] ) ) {
 				throw new \Exception( sprintf( 'Post meta key "%s" is a reserved word.', $key ) );
 			}
 
@@ -55,7 +56,7 @@ function add_meta_fields( $fields, $object_type ) {
 				continue;
 			}
 
-			$fields[ $key ] = array(
+			$fields[ $field_name ] = array(
 				'type'        => resolve_meta_type( $field_args['type'], $field_args['single'] ),
 				'description' => $field_args['description'],
 				'resolve'     => function( $object ) use ( $object_type, $key, $field_args ) {
