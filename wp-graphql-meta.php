@@ -12,7 +12,7 @@ namespace WPGraphQL\Extensions\Meta;
  * Get a collection of registered post types and taxonomies
  * then run them through the GraphQL fields filter.
  */
-add_action( 'graphql_init', function() {
+add_action( 'graphql_register_types', function( $type_registry ) {
 
 	$post_types = get_post_types();
 	$taxonomies = get_taxonomies();
@@ -23,8 +23,8 @@ add_action( 'graphql_init', function() {
 	);
 
 	foreach ( $all_types as $type ) {
-		add_filter( "graphql_{$type}_fields", function ( $fields ) use ( $type ) {
-			return add_meta_fields( $fields, $type );
+		add_filter( "graphql_{$type}_fields", function ( $fields ) use ( $type, $type_registry ) {
+			return add_meta_fields( $fields, $type, $type_registry );
 		} );
 	}
 
@@ -40,7 +40,7 @@ add_action( 'graphql_init', function() {
  * @return array
  * @throws Exception If a meta key is the same as a default key warn the dev.
  */
-function add_meta_fields( $fields, $object_type ) {
+function add_meta_fields( $fields, $object_type, $type_registry ) {
 
 	$meta_keys = get_registered_meta_keys( $object_type );
 
@@ -56,7 +56,7 @@ function add_meta_fields( $fields, $object_type ) {
 			}
 
 			$fields[ $key ] = array(
-				'type'        => resolve_meta_type( $field_args['type'], $field_args['single'] ),
+				'type'        => resolve_meta_type( $field_args['type'], $field_args['single'], $type_registry ),
 				'description' => $field_args['description'],
 				'resolve'     => function( $object ) use ( $object_type, $key, $field_args ) {
 					if ( 'post' === $object_type || in_array( $object_type, get_post_types(), true ) ) {
@@ -84,24 +84,24 @@ function add_meta_fields( $fields, $object_type ) {
  * @param bool $single
  * @return mixed
  */
-function resolve_meta_type( $type, $single = true ) {
+function resolve_meta_type( $type, $single = true, $type_registry ) {
 	if ( $type instanceof \GraphQL\Type\Definition\AbstractType ) {
 		return $type;
 	}
 
 	switch ( $type ) {
 		case 'integer':
-			$type = \WPGraphQL\Types::int();
+			$type = $type_registry->get_type( 'int' );
 			break;
 		case 'number':
-			$type = \WPGraphQL\Types::float();
+			$type = $type_registry->get_type( 'float' );
 			break;
 		case 'boolean':
-			$type = \WPGraphQL\Types::boolean();
+			$type = $type_registry->get_type( 'boolean' );
 			break;
 		default:
-			$type = apply_filters( "graphql_{$type}_type", \WPGraphQL\Types::string(), $type );
+			$type = apply_filters( "graphql_{$type}_type", $type_registry->get_type( 'string' ), $type );
 	}
 
-	return $single ? $type : \WPGraphQL\Types::list_of( $type );
+	return $single ? $type : $type_registry->list_of( $type );
 }
